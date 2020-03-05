@@ -13,40 +13,6 @@ class ProductController extends Controller
     {
         $this->productDomain = new ProductDomain();
     }
-    
-    // public function index()
-    // {
-    //     if(request()->categorie){
-    //         $products = Product::with('categories')->whereHas('categories', function($query) {
-    //             $query->where('slug', request()->categorie);
-    //         })->orderBy('created_at', 'DESC')->paginate(6);
-    //     } else{
-    //         $products = Product::with('categories')->orderBy('created_at', 'DESC')->paginate(6);
-    //     }  
-    //     return view('products.index')->with('products', $products);
-    // }
-
-    public function show($slug)
-    {
-        $product = Product::where('slug', $slug)->firstOrFail();
-
-        return view('products.show')->with('product', $product);
-    }
-
-    public function search()
-    {
-        request()->validate([
-            'q'=> 'required|min:3'
-        ]);
-        
-        $q = request()->input('q');
-
-        $products = Product::where('title', 'like', "%$q%")
-        ->orWhere('description', 'like', "%$q%")
-        ->paginate(6);
-
-        return view('products.search')->with('products', $products);
-    }
 
     public function index()
     {
@@ -57,5 +23,25 @@ class ProductController extends Controller
             $products = $this->productDomain->getProducts();
         }  
         return view('products.index')->with('products', $products);
+    }
+
+    public function show($slug)
+    {
+        $product = $this->productDomain->getProductBySlug($slug);
+
+        return view('products.show')->with('product', $product);
+    }
+
+    public function search()
+    {
+        request()->validate([
+            'search'=> 'required|min:3'
+        ]);
+        
+        $search = request()->input('search');
+
+        $products = $this->productDomain->getProductsByTitleOrDescription($search);
+
+        return view('products.search')->with('products', $products);
     }
 }
